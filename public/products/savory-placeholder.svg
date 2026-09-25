@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 533" role="img" aria-label="Savory dish photo placeholder">
+  <rect width="800" height="533" fill="#EAE0D2"/>
+  <ellipse cx="400" cy="391" rx="270" ry="76" fill="#D4C3AF"/>
+  <ellipse cx="400" cy="357" rx="282" ry="86" fill="#FCFAF5"/>
+  <ellipse cx="400" cy="357" rx="248" ry="66" fill="none" stroke="#D9CAB7" stroke-width="5"/>
+  <ellipse cx="310" cy="317" rx="71" ry="46" fill="#9E6849" transform="rotate(-16 310 317)"/>
+  <ellipse cx="474" cy="331" rx="75" ry="48" fill="#B47A52" transform="rotate(13 474 331)"/>
+  <path d="M275 309c23-20 48-23 70-17M438 323c24-22 56-25 77-13" fill="none" stroke="#D59A68" stroke-width="11" stroke-linecap="round"/>
+  <path d="M390 304c-21-33-20-58-9-81M395 304c13-35 31-49 56-57M384 305c-28-15-47-19-72-16" fill="none" stroke="#68714D" stroke-width="11" stroke-linecap="round"/>
+  <circle cx="375" cy="317" r="9" fill="#758055"/>
+  <circle cx="413" cy="301" r="8" fill="#758055"/>
+</svg>

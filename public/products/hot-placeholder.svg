@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 533" role="img" aria-label="Hot dish photo placeholder">
+  <rect width="800" height="533" fill="#EAE0D2"/>
+  <ellipse cx="400" cy="393" rx="265" ry="73" fill="#D4C3AF"/>
+  <path d="M155 286q17 151 245 151t245-151z" fill="#FCFAF5" stroke="#D9CAB7" stroke-width="7"/>
+  <ellipse cx="400" cy="287" rx="244" ry="89" fill="#FCFAF5" stroke="#D9CAB7" stroke-width="7"/>
+  <ellipse cx="400" cy="287" rx="210" ry="62" fill="#8A4549"/>
+  <ellipse cx="400" cy="285" rx="50" ry="19" fill="#F3EDE3"/>
+  <path d="M393 239c-31-29-55-37-82-34M397 240c27-30 53-38 81-34M400 241c1-30 7-45 19-59" fill="none" stroke="#68714D" stroke-width="11" stroke-linecap="round"/>
+  <circle cx="276" cy="284" r="17" fill="#B7674D"/>
+  <circle cx="529" cy="302" r="15" fill="#B7674D"/>
+  <circle cx="327" cy="313" r="11" fill="#D49366"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 533" role="img" aria-label="Dumplings photo placeholder">
+  <rect width="800" height="533" fill="#EAE0D2"/>
+  <ellipse cx="400" cy="390" rx="271" ry="75" fill="#D4C3AF"/>
+  <ellipse cx="400" cy="357" rx="283" ry="85" fill="#FCFAF5"/>
+  <ellipse cx="400" cy="357" rx="248" ry="66" fill="none" stroke="#D9CAB7" stroke-width="5"/>
+  <g fill="#E8CB9D" stroke="#C79E64" stroke-width="6" stroke-linejoin="round">
+    <path d="M221 337q45-100 105 0q-52 55-105 0z"/>
+    <path d="M333 287q45-100 105 0q-52 55-105 0z"/>
+    <path d="M451 330q45-100 105 0q-52 55-105 0z"/>
+    <path d="M305 384q45-100 105 0q-52 55-105 0z"/>
+    <path d="M439 392q45-100 105 0q-52 55-105 0z"/>
+  </g>
+  <path d="M391 254c18-28 38-42 68-46M392 252c-6-21-19-33-39-43" fill="none" stroke="#68714D" stroke-width="9" stroke-linecap="round"/>
+</svg>

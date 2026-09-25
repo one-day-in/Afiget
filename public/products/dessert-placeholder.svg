@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 533" role="img" aria-label="Dessert photo placeholder">
+  <rect width="800" height="533" fill="#EAE0D2"/>
+  <ellipse cx="400" cy="388" rx="266" ry="74" fill="#D4C3AF"/>
+  <ellipse cx="400" cy="360" rx="280" ry="82" fill="#FCFAF5"/>
+  <ellipse cx="400" cy="360" rx="245" ry="63" fill="none" stroke="#D9CAB7" stroke-width="5"/>
+  <path d="M264 265l174-60 138 79-171 67z" fill="#4A3328"/>
+  <path d="M264 265v95l141 71v-80z" fill="#6B4735"/>
+  <path d="M405 351v80l171-67v-80z" fill="#3A281F"/>
+  <path d="M293 264l146-49 110 63-145 57z" fill="#7B503A"/>
+  <circle cx="326" cy="254" r="20" fill="#8A4549"/>
+  <circle cx="359" cy="235" r="16" fill="#A15A5B"/>
+  <circle cx="384" cy="265" r="12" fill="#8A4549"/>
+  <path d="M331 230c7-14 16-19 30-20" fill="none" stroke="#677350" stroke-width="8" stroke-linecap="round"/>
+</svg>
