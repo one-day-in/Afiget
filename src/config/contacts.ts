@@ -7,10 +7,10 @@
  */
 export const ORDER_CONTACTS = {
   // Telegram username without '@'
-  telegramUsername: 'afiget_hcmc',
+  telegramUsername: 'OneDay_in',
 
   // Zalo phone number or user ID (e.g. '0901234567' or '84901234567')
-  zaloPhoneOrId: '0901234567',
+  zaloPhoneOrId: '0886105293',
 };
 
 /**
