@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { AlertCircle, CheckCircle2, ChevronDown, Check, Send, X } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ChevronDown, Check, Send, X, MessageCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
-import type { CartItem } from '../types';
 import type { Language } from '../translations';
 import { calculateProductPrice, formatAmount, formatVND } from '../utils/format';
+import { ORDER_CONTACTS, getTelegramOrderLinks, getZaloOrderLink } from '../config/contacts';
+import { formatOrderMessage } from '../utils/orderMessage';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -16,30 +17,6 @@ const WEB3FORMS_ACCESS_KEY = '6cf9b2c9-5918-4ff7-923d-8a0b769e345c';
 const contactMethods = ['Telegram', 'Zalo', 'WhatsApp', 'Phone', 'Email', 'Other'] as const;
 type ContactMethod = typeof contactMethods[number];
 type FieldErrors = Partial<Record<'cart' | 'name' | 'method' | 'contact', string>>;
-
-function orderSummary(
-  items: CartItem[], language: Language, name: string,
-  method: ContactMethod, contact: string, comment: string, total: number
-): string {
-  const isRussian = language === 'ru';
-  const lines = [
-    "Афиget' — NEW ORDER REQUEST", '',
-    `${isRussian ? 'Клиент' : 'Customer'}: ${name}`,
-    `${isRussian ? 'Контакт' : 'Contact'}: ${method} — ${contact}`,
-    '', isRussian ? 'ЗАКАЗ' : 'ORDER', '',
-  ];
-  for (const { product, amount } of items) {
-    lines.push(
-      product.name[language],
-      formatAmount(amount, product.unit, language),
-      formatVND(calculateProductPrice(product.price, amount, product.saleType, product.unit)),
-      ''
-    );
-  }
-  lines.push('--------------------', `${isRussian ? 'СТОИМОСТЬ ПРОДУКТОВ' : 'PRODUCT TOTAL'}: ${formatVND(total)}`);
-  if (comment) lines.push('', `${isRussian ? 'Комментарий' : 'Comment'}: ${comment}`);
-  return lines.join('\n');
-}
 
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose }) => {
   const { t, language } = useLanguage();
@@ -58,6 +35,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   const [isSuccess, setIsSuccess] = useState(false);
   const [submittedTotal, setSubmittedTotal] = useState(0);
 
+  // Status feedback toast for messenger actions
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showFormFallback, setShowFormFallback] = useState(false);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -74,6 +55,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [isMethodDropdownOpen]);
+
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => {
+        setToastMessage(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   const selectContactMethod = (method: ContactMethod) => {
     setContactMethod(method);
@@ -115,13 +105,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (isSubmitting) return;
+  const validateFields = (): boolean => {
     const cleanName = name.trim();
     const cleanContact = contact.trim();
-    const cleanComment = comment.trim();
     const nextErrors: FieldErrors = {};
+
     if (items.length === 0) nextErrors.cart = t.validationCart;
     if (!cleanName) nextErrors.name = t.validationName;
     if (!contactMethod) nextErrors.method = t.validationContactMethod;
@@ -129,9 +117,79 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     else if (contactMethod === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanContact)) {
       nextErrors.contact = t.validationEmail;
     }
+
     setErrors(nextErrors);
-    setSubmitError(null);
-    if (Object.keys(nextErrors).length > 0 || !contactMethod) return;
+    return Object.keys(nextErrors).length === 0 && !!contactMethod;
+  };
+
+  const getFullOrderText = (): string => {
+    return formatOrderMessage({
+      items,
+      language: language as Language,
+      name: name.trim(),
+      contactMethod: contactMethod ? methodLabels[contactMethod] : undefined,
+      contact: contact.trim(),
+      comment: comment.trim(),
+      totalPrice,
+    });
+  };
+
+  const copyToClipboardSafely = async (text: string) => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {
+      // Fallback below
+    }
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand('copy');
+      textArea.remove();
+      return successful;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleTelegramOrder = async () => {
+    if (!validateFields()) return;
+    const orderText = getFullOrderText();
+    await copyToClipboardSafely(orderText);
+
+    const { directChatUrl } = getTelegramOrderLinks(ORDER_CONTACTS.telegramUsername, orderText);
+    setToastMessage(t.copiedToClipboard);
+
+    window.open(directChatUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleZaloOrder = async () => {
+    if (!validateFields()) return;
+    const orderText = getFullOrderText();
+    await copyToClipboardSafely(orderText);
+
+    const { chatUrl } = getZaloOrderLink(ORDER_CONTACTS.zaloPhoneOrId);
+    setToastMessage(t.orderReadyToPaste);
+
+    window.open(chatUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isSubmitting) return;
+    if (!validateFields()) return;
+
+    const cleanName = name.trim();
+    const cleanContact = contact.trim();
+    const cleanComment = comment.trim();
 
     const payload: Record<string, string | boolean> = {
       access_key: WEB3FORMS_ACCESS_KEY,
@@ -142,13 +200,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
       contact: cleanContact,
       language,
       product_total: formatVND(totalPrice),
-      order_summary: orderSummary(items, language, cleanName, contactMethod, cleanContact, cleanComment, totalPrice),
+      order_summary: getFullOrderText(),
       comment: cleanComment,
       botcheck: '',
     };
     if (contactMethod === 'Email') payload.email = cleanContact;
 
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
@@ -179,6 +238,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
       setComment('');
       setErrors({});
       setSubmitError(null);
+      setShowFormFallback(false);
     }
     onClose();
   };
@@ -221,7 +281,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} noValidate className="space-y-4">
+            <div className="space-y-4">
+              {/* Toast message for messenger actions */}
+              {toastMessage && (
+                <div role="status" className="p-3.5 rounded-xl bg-caramel-100 border border-caramel-300 text-warm-dark text-xs flex items-center gap-2.5 animate-fadeIn">
+                  <CheckCircle2 className="w-4 h-4 text-caramel-700 shrink-0" />
+                  <span className="font-medium">{toastMessage}</span>
+                </div>
+              )}
+
+              {/* Order items summary */}
               <section aria-label={t.yourOrder} className="rounded-xl border border-warm-border bg-cream-25 p-4">
                 <h3 className="font-serif text-xl font-bold text-warm-dark mb-3">{t.yourOrder}</h3>
                 {items.length > 0 ? (
@@ -246,6 +315,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                 {errors.cart && <p role="alert" className="text-xs text-terracotta-700 mt-2">{errors.cart}</p>}
               </section>
 
+              {/* Customer information */}
               <div>
                 <label htmlFor="order-name" className="block text-xs font-semibold text-warm-dark mb-1.5">{t.nameLabel} *</label>
                 <input id="order-name" value={name} maxLength={120} autoComplete="name"
@@ -336,15 +406,71 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                   className="w-full px-4 py-3 rounded-xl bg-cream-25 border border-warm-border focus:outline-none focus:ring-2 focus:ring-caramel-500 text-sm text-warm-dark resize-y" />
               </div>
 
-              {submitError && <div role="alert" className="p-3 rounded-xl bg-cream-100 border border-terracotta-500/30 text-terracotta-700 text-xs flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" /><span>{submitError}</span>
-              </div>}
+              {/* Order Placement Options: Telegram & Zalo */}
+              <div className="pt-2">
+                <p className="block text-xs font-semibold text-warm-dark mb-2.5">
+                  {t.placeOrderChoiceTitle}
+                </p>
 
-              <button type="submit" disabled={isSubmitting}
-                className="w-full min-h-12 px-4 bg-warm-chocolate hover:bg-warm-espresso text-cream-50 font-semibold rounded-xl flex items-center justify-center gap-2 disabled:opacity-60">
-                <Send className="w-4 h-4" /><span>{isSubmitting ? t.submitting : t.placeOrderButton}</span>
-              </button>
-            </form>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {/* Telegram Button */}
+                  <button
+                    type="button"
+                    onClick={handleTelegramOrder}
+                    className="min-h-12 px-4 py-3 bg-[#229ED9] hover:bg-[#1e8bc0] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>{t.orderViaTelegram}</span>
+                  </button>
+
+                  {/* Zalo Button */}
+                  <button
+                    type="button"
+                    onClick={handleZaloOrder}
+                    className="min-h-12 px-4 py-3 bg-[#0068FF] hover:bg-[#0058db] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>{t.orderViaZalo}</span>
+                  </button>
+                </div>
+                <p className="text-[11px] text-warm-muted leading-tight mt-2 text-center">
+                  {language === 'ru' 
+                    ? 'Заказ откроется в выбранном мессенджере. Корзина не очищается автоматически.'
+                    : 'The order will open in the chosen messenger. Your cart is preserved.'}
+                </p>
+              </div>
+
+              {/* Fallback Form Section */}
+              <div className="pt-2 border-t border-warm-border/60">
+                {!showFormFallback ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowFormFallback(true)}
+                    className="w-full text-xs text-warm-muted hover:text-warm-dark underline py-1 text-center transition-colors"
+                  >
+                    {t.orSendViaForm}
+                  </button>
+                ) : (
+                  <form onSubmit={handleFormSubmit} noValidate className="space-y-3 pt-1">
+                    {submitError && (
+                      <div role="alert" className="p-3 rounded-xl bg-cream-100 border border-terracotta-500/30 text-terracotta-700 text-xs flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        <span>{submitError}</span>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full min-h-11 px-4 bg-warm-chocolate hover:bg-warm-espresso text-cream-50 font-semibold rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 text-sm"
+                    >
+                      <Send className="w-4 h-4" />
+                      <span>{isSubmitting ? t.submitting : t.orderViaForm}</span>
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </div>
