@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import type { Language } from '../translations';
 import { calculateProductPrice, formatAmount, formatVND } from '../utils/format';
-import { ORDER_CONTACTS, getTelegramOrderLinks, getZaloOrderLink } from '../config/contacts';
+import { ORDER_CONTACTS, getTelegramChatLink, getTelegramOrderLink, getZaloOrderLink } from '../config/contacts';
 import { formatOrderMessage } from '../utils/orderMessage';
 
 interface CheckoutModalProps {
@@ -37,6 +37,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
   // Status feedback toast for messenger actions
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showManualTelegramOrder, setShowManualTelegramOrder] = useState(false);
   const [showFormFallback, setShowFormFallback] = useState(false);
 
   useEffect(() => {
@@ -160,15 +161,29 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     }
   };
 
-  const handleTelegramOrder = async () => {
+  const handleTelegramOrder = () => {
     if (!validateFields()) return;
-    const orderText = getFullOrderText();
-    await copyToClipboardSafely(orderText);
+    const telegramUrl = getTelegramOrderLink(ORDER_CONTACTS.telegramUsername, getFullOrderText());
+    try {
+      const telegramTab = window.open('about:blank', '_blank');
+      if (!telegramTab) {
+        setShowManualTelegramOrder(true);
+        return;
+      }
+      telegramTab.opener = null;
+      telegramTab.location.replace(telegramUrl);
+    } catch {
+      setShowManualTelegramOrder(true);
+    }
+  };
 
-    const { directChatUrl } = getTelegramOrderLinks(ORDER_CONTACTS.telegramUsername, orderText);
-    setToastMessage(t.copiedToClipboard);
-
-    window.open(directChatUrl, '_blank', 'noopener,noreferrer');
+  const handleOpenTelegram = () => {
+    if (!validateFields()) return;
+    window.open(
+      getTelegramChatLink(ORDER_CONTACTS.telegramUsername),
+      '_blank',
+      'noopener,noreferrer',
+    );
   };
 
   const handleZaloOrder = async () => {
@@ -230,6 +245,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
   const handleClose = () => {
     if (isSubmitting) return;
+    setShowManualTelegramOrder(false);
+    setToastMessage(null);
     if (isSuccess) {
       setIsSuccess(false);
       setName('');
@@ -412,31 +429,51 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                   {t.placeOrderChoiceTitle}
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {/* Telegram Button */}
+                <p className="text-xs text-warm-muted mb-2">{t.telegramPasteHint}</p>
+                <div>
                   <button
                     type="button"
                     onClick={handleTelegramOrder}
-                    className="min-h-12 px-4 py-3 bg-[#229ED9] hover:bg-[#1e8bc0] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
+                    className="w-full min-h-12 px-4 py-3 bg-[#229ED9] hover:bg-[#1e8bc0] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
                   >
                     <Send className="w-4 h-4" />
                     <span>{t.orderViaTelegram}</span>
                   </button>
+                </div>
+                <button type="button" onClick={() => { if (validateFields()) setShowManualTelegramOrder(true); }}
+                  className="w-full mt-2 text-xs text-warm-muted hover:text-warm-dark underline py-1 text-center">
+                  {t.telegramFallbackAction}
+                </button>
 
-                  {/* Zalo Button */}
+                {showManualTelegramOrder && (
+                  <div className="mt-3">
+                    <p className="text-xs text-warm-muted mb-2">{t.telegramManualCopyHint}</p>
+                    <label htmlFor="telegram-order-text" className="block text-xs font-semibold text-warm-dark mb-1.5">
+                      {t.telegramManualCopyLabel}
+                    </label>
+                    <textarea id="telegram-order-text" readOnly rows={8} value={getFullOrderText()}
+                      onFocus={(event) => event.currentTarget.select()}
+                      className="w-full px-4 py-3 rounded-xl bg-cream-25 border border-warm-border text-sm text-warm-dark resize-y" />
+                    <button type="button" onClick={handleOpenTelegram}
+                      className="w-full min-h-12 mt-2.5 px-4 py-3 bg-[#229ED9] hover:bg-[#1e8bc0] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm">
+                      <Send className="w-4 h-4" />
+                      <span>{t.openTelegram}</span>
+                    </button>
+                  </div>
+                )}
+
+                <div className="mt-2.5">
                   <button
                     type="button"
                     onClick={handleZaloOrder}
-                    className="min-h-12 px-4 py-3 bg-[#0068FF] hover:bg-[#0058db] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
+                    className="w-full min-h-12 px-4 py-3 bg-[#0068FF] hover:bg-[#0058db] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
                   >
                     <MessageCircle className="w-4 h-4" />
                     <span>{t.orderViaZalo}</span>
                   </button>
                 </div>
                 <p className="text-[11px] text-warm-muted leading-tight mt-2 text-center">
-                  {language === 'ru' 
-                    ? 'Заказ откроется в выбранном мессенджере. Корзина не очищается автоматически.'
-                    : 'The order will open in the chosen messenger. Your cart is preserved.'}
+                  {t.messengerCartHint}
                 </p>
               </div>
 
