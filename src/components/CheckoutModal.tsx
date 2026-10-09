@@ -165,13 +165,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     if (!validateFields()) return;
     const telegramUrl = getTelegramOrderLink(ORDER_CONTACTS.telegramUsername, getFullOrderText());
     try {
-      const telegramTab = window.open('about:blank', '_blank');
-      if (!telegramTab) {
-        setShowManualTelegramOrder(true);
-        return;
-      }
-      telegramTab.opener = null;
-      telegramTab.location.replace(telegramUrl);
+      window.location.assign(telegramUrl);
     } catch {
       setShowManualTelegramOrder(true);
     }
@@ -179,11 +173,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
   const handleOpenTelegram = () => {
     if (!validateFields()) return;
-    window.open(
-      getTelegramChatLink(ORDER_CONTACTS.telegramUsername),
-      '_blank',
-      'noopener,noreferrer',
-    );
+    window.location.assign(getTelegramChatLink(ORDER_CONTACTS.telegramUsername));
   };
 
   const handleZaloOrder = async () => {
