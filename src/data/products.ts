@@ -41,8 +41,8 @@ export const products: Product[] = [
       id: 'chocolate-brownie',
       categoryId: 'desserts',
       name: {
-        ru: 'Шоколадный брауни с миндалём',
-        en: 'Chocolate Brownie with Almonds',
+        ru: 'Шоколадный торт-брауни „Ещё один кусь“',
+        en: 'Chocolate Brownie Cake “One More Bite”',
       },
       description: {
         ru: 'Насыщенный шоколадный брауни, приготовленный из шоколада с фермы неподалёку от реки Меконг. Сверху посыпан нежными миндальными лепестками.',

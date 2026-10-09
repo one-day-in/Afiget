@@ -99,7 +99,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpen }) => 
           <div className="mb-2">
             <h3 className="font-serif text-base sm:text-lg font-semibold text-warm-dark leading-tight break-words">
               <button type="button" onClick={(event) => onOpen(product, event.currentTarget)}
-                className="text-left hover:text-caramel-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-caramel-700 rounded-sm">
+                className="block w-full break-words text-left hover:text-caramel-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-caramel-700 rounded-sm">
                 {productName}
               </button>
             </h3>
