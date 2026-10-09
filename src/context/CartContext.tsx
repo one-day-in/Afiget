@@ -26,7 +26,7 @@ function validAmount(product: Product, amount: number): boolean {
 }
 
 function restoredAmount(product: Product, amount: number): number | null {
-  if (!Number.isSafeInteger(amount) || amount < 1 || amount > 100_000) return null;
+  if (!Number.isSafeInteger(amount) || amount < product.minimumAmount || amount > 100_000) return null;
   const normalized = product.minimumAmount + Math.max(0,
     Math.ceil((amount - product.minimumAmount) / product.amountStep)) * product.amountStep;
   return normalized <= 100_000 ? normalized : null;

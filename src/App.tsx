@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Header } from './components/Header';
-import { MenuFilters } from './components/MenuFilters';
 import { ProductGrid } from './components/ProductGrid';
 import { CartDrawer } from './components/CartDrawer';
 import { BrandWordmark } from './components/BrandWordmark';
-import { categories, products } from './data/products';
+import { products } from './data/products';
 import { useLanguage } from './context/LanguageContext';
 import { Heart } from 'lucide-react';
 
 export const App: React.FC = () => {
   const { t } = useLanguage();
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const sortedProducts = [...products].sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
@@ -31,14 +29,8 @@ export const App: React.FC = () => {
             </p>
           </section>
 
-          <MenuFilters
-            categories={categories}
-            selectedCategoryId={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-          />
-
           <section>
-            <ProductGrid products={sortedProducts} selectedCategoryId={selectedCategory} />
+            <ProductGrid products={sortedProducts} selectedCategoryId="all" />
           </section>
         </div>
         <CartDrawer />

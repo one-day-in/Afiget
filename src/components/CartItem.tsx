@@ -3,7 +3,7 @@ import { Minus, Plus, Trash2 } from 'lucide-react';
 import { CartItem as CartItemType } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
-import { formatVND, calculateProductPrice, formatAmount } from '../utils/format';
+import { formatVND, calculateProductPrice, formatAmount, formatPriceUnit } from '../utils/format';
 import { productImageUrl } from '../utils/productImage';
 
 interface CartItemProps {
@@ -67,7 +67,7 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
         </div>
 
         <div className="text-xs text-warm-muted mb-2">
-          {formatVND(product.price)} / {product.unit === '100g' ? '100g' : product.unit}
+          {formatVND(product.price)} / {formatPriceUnit(product.unit, language)}
         </div>
 
         {/* Stepper + Subtotal */}

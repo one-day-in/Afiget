@@ -2,53 +2,37 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Minus, Plus, ShoppingBag, Clock, Check } from 'lucide-react';
 import { Product } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { useCart } from '../context/CartContext';
-import { formatVND, calculateProductPrice, formatAmount } from '../utils/format';
+import { formatVND, formatAmount, formatPriceUnit } from '../utils/format';
 import { productImageUrl } from '../utils/productImage';
+import { useProductSelection } from '../hooks/useProductSelection';
 
 interface ProductCardProps {
   product: Product;
+  onOpen: (product: Product, trigger: HTMLButtonElement) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpen }) => {
   const { language, t } = useLanguage();
-  const { addToCart } = useCart();
+  const { amount, canDecrease, canIncrease, decrease, increase, currentPrice, addSelectedToCart } = useProductSelection(product);
 
-  // State for amount to add
-  const [selectedAmount, setSelectedAmount] = useState<number>(product.minimumAmount);
   const [isAddedAnim, setIsAddedAnim] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const addedTimer = useRef<number | null>(null);
-  useEffect(() => setSelectedAmount(product.minimumAmount), [product.minimumAmount, product.amountStep]);
   useEffect(() => setImageFailed(false), [product.image]);
   useEffect(() => () => {
     if (addedTimer.current !== null) window.clearTimeout(addedTimer.current);
   }, []);
 
   const productName = product.name[language] || product.name.ru || product.name.en;
-  const productDesc = product.description[language] || product.description.ru || product.description.en;
   const prepTime = product.preparationTime?.[language] || product.preparationTime?.ru;
-
-  const handleDecrease = () => {
-    setSelectedAmount((prev) => {
-      const next = prev - product.amountStep;
-      return next >= product.minimumAmount ? next : prev;
-    });
-  };
-
-  const handleIncrease = () => {
-    setSelectedAmount((prev) => prev + product.amountStep <= 100_000 ? prev + product.amountStep : prev);
-  };
 
   const handleAddToCart = () => {
     if (product.status === 'unavailable') return;
-    addToCart(product, selectedAmount);
+    addSelectedToCart();
     setIsAddedAnim(true);
     if (addedTimer.current !== null) window.clearTimeout(addedTimer.current);
     addedTimer.current = window.setTimeout(() => setIsAddedAnim(false), 1200);
   };
-
-  const currentPrice = calculateProductPrice(product.price, selectedAmount, product.saleType, product.unit);
 
   // Badge mapping
   const badgeLabels: Record<string, string> = {
@@ -60,26 +44,32 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="group flex flex-col bg-cream-25 rounded-2xl overflow-hidden border border-warm-border/75 shadow-[0_3px_18px_rgba(60,43,33,0.04)] hover:shadow-[0_12px_28px_rgba(60,43,33,0.09)] transition-shadow duration-300">
+    <div className="group min-w-0 flex flex-col bg-cream-25 rounded-2xl overflow-hidden border border-warm-border/75 shadow-[0_3px_18px_rgba(60,43,33,0.04)] hover:shadow-[0_12px_28px_rgba(60,43,33,0.09)] transition-shadow duration-300">
       
       {/* Product Image Container */}
-      <div className="relative aspect-[3/2] w-full bg-cream-200/50 overflow-hidden">
+      <div className="relative aspect-[4/5] w-full bg-cream-200/50 overflow-hidden">
         {product.image && !imageFailed ? (
-          <img
-            src={productImageUrl(product.image)}
-            alt={productName}
-            className="w-full h-full object-cover group-hover:scale-[1.025] transition-transform duration-500 ease-out"
-            loading="lazy"
-            onError={() => setImageFailed(true)}
-          />
+          <button type="button" onClick={(event) => onOpen(product, event.currentTarget)}
+            aria-label={`${t.viewProductDetails}: ${productName}`}
+            className="block w-full h-full cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-caramel-700">
+            <img
+              src={productImageUrl(product.image)}
+              alt={productName}
+              className="w-full h-full object-contain"
+              loading="lazy"
+              onError={() => setImageFailed(true)}
+            />
+          </button>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-cream-200 text-warm-muted/40 font-serif text-2xl">
+          <button type="button" onClick={(event) => onOpen(product, event.currentTarget)}
+            aria-label={`${t.viewProductDetails}: ${productName}`}
+            className="w-full h-full flex items-center justify-center bg-cream-200 text-warm-muted/40 font-serif text-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-caramel-700">
             Афиget'
-          </div>
+          </button>
         )}
 
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
           {product.badge && (
             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.08em] text-cream-25 ${
               product.badge === 'Bestseller' ? 'bg-terracotta-500' : product.badge === 'Natural' ? 'bg-caramel-600' : 'bg-warm-espresso/95'
@@ -104,60 +94,59 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       {/* Product Content Details */}
-      <div className="p-5 flex-1 flex flex-col justify-between">
+      <div className="p-2.5 sm:p-3 flex-1 flex flex-col justify-between min-w-0">
         <div>
-          <div className="flex items-start justify-between gap-2 mb-1.5">
-            <h3 className="font-serif text-[25px] font-semibold text-warm-dark leading-[1.04]">
-              {productName}
+          <div className="mb-2">
+            <h3 className="font-serif text-base sm:text-lg font-semibold text-warm-dark leading-tight break-words">
+              <button type="button" onClick={(event) => onOpen(product, event.currentTarget)}
+                className="text-left hover:text-caramel-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-caramel-700 rounded-sm">
+                {productName}
+              </button>
             </h3>
           </div>
 
-          <p className="text-[13px] text-warm-muted leading-[1.55] line-clamp-3 mb-3">
-            {productDesc}
-          </p>
-
-          <div className="text-xs text-warm-dark mb-4 font-semibold">
-            {formatVND(product.price)} <span className="text-warm-muted font-normal">/ {product.unit === '100g' ? (language === 'ru' ? '100 г' : '100 g') : product.unit === 'kg' ? (language === 'ru' ? '1 кг' : '1 kg') : product.unit === 'portion' ? (language === 'ru' ? 'порция' : 'portion') : (language === 'ru' ? 'шт' : 'pc')}</span>
+          <div className="text-[11px] sm:text-xs text-warm-dark mb-3 font-semibold leading-snug break-words">
+            {formatVND(product.price)} <span className="text-warm-muted font-normal">/ {formatPriceUnit(product.unit, language)}</span>
           </div>
         </div>
 
         {/* Bottom Actions: Amount selector & Price & Add button */}
-        <div className="pt-3.5 border-t border-warm-border/55">
+        <div className="pt-2.5 border-t border-warm-border/55">
           
           {product.status !== 'unavailable' ? (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               
               {/* Stepper & Total Calculated */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1.5 min-w-0">
                 
                 {/* Stepper Buttons */}
-                <div className="flex items-center bg-cream-100 rounded-full border border-warm-border/70 p-1">
+                <div className="flex items-center min-w-0 bg-cream-100 rounded-full border border-warm-border/70 p-1">
                   <button
-                    onClick={handleDecrease}
-                    disabled={selectedAmount <= product.minimumAmount}
+                    onClick={decrease}
+                    disabled={!canDecrease}
                     aria-label={language === 'ru' ? 'Уменьшить количество' : 'Decrease amount'}
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-cream-25 text-warm-dark shadow-xs hover:bg-cream-200 disabled:opacity-40 disabled:hover:bg-cream-25 transition-colors"
+                    className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-cream-25 text-warm-dark shadow-xs hover:bg-cream-200 disabled:opacity-40 disabled:hover:bg-cream-25 transition-colors"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
                   
-                  <span className="min-w-[4rem] text-center text-xs sm:text-sm font-semibold text-warm-dark px-1.5">
-                    {formatAmount(selectedAmount, product.unit, language)}
+                  <span className="min-w-0 flex-1 text-center text-[11px] sm:text-xs font-semibold text-warm-dark px-0.5 break-words">
+                    {formatAmount(amount, product.unit, language)}
                   </span>
 
                   <button
-                    onClick={handleIncrease}
-                    disabled={selectedAmount + product.amountStep > 100_000}
+                    onClick={increase}
+                    disabled={!canIncrease}
                     aria-label={language === 'ru' ? 'Увеличить количество' : 'Increase amount'}
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-cream-25 text-warm-dark shadow-xs hover:bg-cream-200 transition-colors"
+                    className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-cream-25 text-warm-dark shadow-xs hover:bg-cream-200 transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
                 {/* Subtotal */}
-                <div className="text-right">
-                  <span className="font-bold text-sm sm:text-base text-warm-dark tracking-tight">
+                <div className="text-right min-w-0">
+                  <span className="font-bold text-xs sm:text-sm text-warm-dark tracking-tight break-words">
                     {formatVND(currentPrice)}
                   </span>
                 </div>
@@ -166,7 +155,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               {/* Add to Cart Button */}
               <button
                 onClick={handleAddToCart}
-                className={`w-full py-3 px-4 rounded-xl font-semibold text-[13px] flex items-center justify-center gap-2 transition-colors duration-200 ${
+                className={`w-full min-h-10 py-2 px-1.5 rounded-xl font-semibold text-[11px] sm:text-xs flex items-center justify-center gap-1 min-w-0 transition-colors duration-200 ${
                   isAddedAnim
                     ? 'bg-caramel-700 text-cream-25'
                     : 'bg-warm-chocolate hover:bg-warm-espresso text-cream-25'
@@ -174,13 +163,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               >
                 {isAddedAnim ? (
                   <>
-                    <Check className="w-4 h-4" />
-                    <span>{t.addedToCart}</span>
+                    <Check className="w-3.5 h-3.5 shrink-0" />
+                    <span className="break-words">{t.addedToCart}</span>
                   </>
                 ) : (
                   <>
-                    <ShoppingBag className="w-4 h-4" />
-                    <span>{t.addToCart}</span>
+                    <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
+                    <span className="break-words">{t.addToCart}</span>
                   </>
                 )}
               </button>

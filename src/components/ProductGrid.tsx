@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Product } from '../types';
 import { ProductCard } from './ProductCard';
+import { ProductDetailModal } from './ProductDetailModal';
 import { useLanguage } from '../context/LanguageContext';
 
 interface ProductGridProps {
@@ -13,6 +14,17 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   selectedCategoryId,
 }) => {
   const { t } = useLanguage();
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const returnFocusRef = useRef<HTMLButtonElement | null>(null);
+
+  const openProduct = (product: Product, trigger: HTMLButtonElement) => {
+    returnFocusRef.current = trigger;
+    setSelectedProduct(product);
+  };
+  const closeProduct = useCallback(() => {
+    setSelectedProduct(null);
+    window.requestAnimationFrame(() => returnFocusRef.current?.focus());
+  }, []);
 
   const filteredProducts = products.filter((p) => {
     if (selectedCategoryId === 'all') return true;
@@ -28,10 +40,13 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-      {filteredProducts.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
+    <>
+      <div className="grid min-w-0 grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+        {filteredProducts.map((product) => (
+          <ProductCard key={product.id} product={product} onOpen={openProduct} />
+        ))}
+      </div>
+      {selectedProduct && <ProductDetailModal product={selectedProduct} onClose={closeProduct} />}
+    </>
   );
 };

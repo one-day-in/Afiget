@@ -1,6 +1,6 @@
 export type SaleType = 'weight' | 'quantity';
 
-export type ProductUnit = '100g' | 'kg' | 'piece' | 'portion';
+export type ProductUnit = '100g' | 'kg' | 'piece' | 'portion' | 'container250ml';
 
 export type ProductStatus = 'available' | 'preorder' | 'unavailable';
 
@@ -14,6 +14,10 @@ export interface Product {
     en: string;
   };
   description: {
+    ru: string;
+    en: string;
+  };
+  ingredients?: {
     ru: string;
     en: string;
   };
