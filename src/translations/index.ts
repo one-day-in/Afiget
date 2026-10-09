@@ -3,7 +3,7 @@ export type Language = 'ru' | 'en';
 export const translations = {
   ru: {
     brand: "Афиget'",
-    brandCategory: 'Пекарня и кухня',
+    brandCategory: 'по-домашнему',
     tagline: 'Домашняя кухня и кондитерская в Хошимине',
     heroTitle: 'Наше меню',
     heroSubtitle: 'Домашняя выпечка и любимые блюда в Хошимине. Готовим небольшими партиями — с заботой и вкусом.',
@@ -83,7 +83,7 @@ export const translations = {
   },
   en: {
     brand: "Афиget'",
-    brandCategory: 'Bakery & Food',
+    brandCategory: 'Homemade',
     tagline: 'Home bakery & comfort food in Ho Chi Minh City',
     heroTitle: 'Our Menu',
     heroSubtitle: 'Homemade cakes and comfort food in Ho Chi Minh City, prepared in small batches with care.',
