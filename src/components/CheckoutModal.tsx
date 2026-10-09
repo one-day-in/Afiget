@@ -35,9 +35,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   const [isSuccess, setIsSuccess] = useState(false);
   const [submittedTotal, setSubmittedTotal] = useState(0);
 
-  // Status feedback toast for messenger actions
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showManualTelegramOrder, setShowManualTelegramOrder] = useState(false);
+  const [zaloCopyState, setZaloCopyState] = useState<{ status: 'copied' | 'manual'; text: string } | null>(null);
+  const [isCopyingZalo, setIsCopyingZalo] = useState(false);
   const [showFormFallback, setShowFormFallback] = useState(false);
 
   useEffect(() => {
@@ -56,15 +56,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [isMethodDropdownOpen]);
-
-  useEffect(() => {
-    if (toastMessage) {
-      const timer = setTimeout(() => {
-        setToastMessage(null);
-      }, 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [toastMessage]);
 
   const selectContactMethod = (method: ContactMethod) => {
     setContactMethod(method);
@@ -135,32 +126,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     });
   };
 
-  const copyToClipboardSafely = async (text: string) => {
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-        return true;
-      }
-    } catch {
-      // Fallback below
-    }
-    try {
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      const successful = document.execCommand('copy');
-      textArea.remove();
-      return successful;
-    } catch {
-      return false;
-    }
-  };
-
   const handleTelegramOrder = () => {
     if (!validateFields()) return;
     const telegramUrl = getTelegramOrderLink(ORDER_CONTACTS.telegramUsername, getFullOrderText());
@@ -176,15 +141,28 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     window.location.assign(getTelegramChatLink(ORDER_CONTACTS.telegramUsername));
   };
 
-  const handleZaloOrder = async () => {
-    if (!validateFields()) return;
+  const handleCopyZaloOrder = async () => {
+    if (isCopyingZalo || !validateFields()) return;
     const orderText = getFullOrderText();
-    await copyToClipboardSafely(orderText);
+    setZaloCopyState(null);
+    setIsCopyingZalo(true);
+    try {
+      if (!window.isSecureContext || !navigator.clipboard?.writeText) {
+        throw new Error('Clipboard API unavailable');
+      }
+      await navigator.clipboard.writeText(orderText);
+      setZaloCopyState({ status: 'copied', text: orderText });
+    } catch {
+      setZaloCopyState({ status: 'manual', text: orderText });
+    } finally {
+      setIsCopyingZalo(false);
+    }
+  };
 
+  const handleOpenZalo = () => {
+    if (!validateFields()) return;
     const { chatUrl } = getZaloOrderLink(ORDER_CONTACTS.zaloPhoneOrId);
-    setToastMessage(t.orderReadyToPaste);
-
-    window.open(chatUrl, '_blank', 'noopener,noreferrer');
+    window.location.assign(chatUrl);
   };
 
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -236,7 +214,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   const handleClose = () => {
     if (isSubmitting) return;
     setShowManualTelegramOrder(false);
-    setToastMessage(null);
+    setZaloCopyState(null);
     if (isSuccess) {
       setIsSuccess(false);
       setName('');
@@ -289,14 +267,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Toast message for messenger actions */}
-              {toastMessage && (
-                <div role="status" className="p-3.5 rounded-xl bg-caramel-100 border border-caramel-300 text-warm-dark text-xs flex items-center gap-2.5 animate-fadeIn">
-                  <CheckCircle2 className="w-4 h-4 text-caramel-700 shrink-0" />
-                  <span className="font-medium">{toastMessage}</span>
-                </div>
-              )}
-
               {/* Order items summary */}
               <section aria-label={t.yourOrder} className="rounded-xl border border-warm-border bg-cream-25 p-4">
                 <h3 className="font-serif text-xl font-bold text-warm-dark mb-3">{t.yourOrder}</h3>
@@ -453,13 +423,34 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                 )}
 
                 <div className="mt-2.5">
+                  <p className="text-xs text-warm-muted mb-2">{t.zaloActionHint}</p>
                   <button
                     type="button"
-                    onClick={handleZaloOrder}
+                    onClick={handleCopyZaloOrder}
+                    disabled={isCopyingZalo}
                     className="w-full min-h-12 px-4 py-3 bg-[#0068FF] hover:bg-[#0058db] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
                   >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>{t.orderViaZalo}</span>
+                    <span>{t.copyZaloOrder}</span>
+                  </button>
+                  {zaloCopyState?.status === 'copied' && zaloCopyState.text === getFullOrderText() && (
+                    <p role="status" className="text-xs text-warm-dark mt-2">{t.copiedToClipboard}</p>
+                  )}
+                  {zaloCopyState?.status === 'manual' && (
+                    <div className="mt-3">
+                      <p role="alert" className="text-xs text-warm-muted mb-2">{t.zaloManualCopyHint}</p>
+                      <label htmlFor="zalo-order-text" className="block text-xs font-semibold text-warm-dark mb-1.5">
+                        {t.zaloManualCopyLabel}
+                      </label>
+                      <textarea id="zalo-order-text" readOnly rows={8} value={getFullOrderText()}
+                        onFocus={(event) => event.currentTarget.select()}
+                        className="w-full px-4 py-3 rounded-xl bg-cream-25 border border-warm-border text-sm text-warm-dark resize-y" />
+                    </div>
+                  )}
+                  <button type="button" onClick={handleOpenZalo}
+                    disabled={!zaloCopyState || zaloCopyState.text !== getFullOrderText()}
+                    className="w-full min-h-12 mt-2.5 px-4 py-3 bg-[#0068FF] hover:bg-[#0058db] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                    <MessageCircle className="w-4 h-4 shrink-0" />
+                    <span>{t.openZalo}</span>
                   </button>
                 </div>
                 <p className="text-[11px] text-warm-muted leading-tight mt-2 text-center">

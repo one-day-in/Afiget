@@ -28,7 +28,7 @@ export function formatOrderMessage({
   const lines: string[] = [];
 
   lines.push(isRu ? "🥐 ЗАКАЗ — Афиget'" : "🥐 NEW ORDER — Афиget'");
-  lines.push('────────────────────────');
+  lines.push('');
 
   if (name && name.trim()) {
     lines.push(`${isRu ? '👤 Клиент' : '👤 Customer'}: ${name.trim()}`);
@@ -50,7 +50,7 @@ export function formatOrderMessage({
     lines.push(`   ${amountStr} × ${formatVND(product.price)} = ${formatVND(itemTotal)}`);
   });
 
-  lines.push('────────────────────────');
+  lines.push('');
   lines.push(`${isRu ? '💰 Итого' : '💰 Total'}: ${formatVND(totalPrice)}`);
 
   if (comment && comment.trim()) {
