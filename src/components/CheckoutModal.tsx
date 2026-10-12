@@ -176,8 +176,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
     const payload: Record<string, string | boolean> = {
       access_key: WEB3FORMS_ACCESS_KEY,
-      subject: `Афиget' — New order — ${formatVND(totalPrice)}`,
-      from_name: "Афиget' Bakery",
+      subject: `Afiget’ — New order — ${formatVND(totalPrice)}`,
+      from_name: "Afiget’ Bakery",
       customer_name: cleanName,
       contact_method: contactMethod,
       contact: cleanContact,
@@ -235,7 +235,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-warm-dark/60">
-      <div role="dialog" aria-modal="true" aria-labelledby="order-dialog-title" className="relative w-full max-w-lg bg-cream-50 rounded-2xl shadow-2xl border border-warm-border overflow-hidden max-h-[94vh] sm:max-h-[90vh] flex flex-col">
+      <div role="dialog" aria-modal="true" aria-labelledby="order-dialog-title" className="relative w-full max-w-lg bg-cream-25 rounded-xl shadow-2xl border border-warm-border overflow-hidden max-h-[94vh] sm:max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-warm-border/60 bg-cream-100/50">
           <div>
             <h2 id="order-dialog-title" className="font-serif text-2xl font-bold text-warm-dark">
@@ -261,7 +261,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                 {t.orderSummary}: {formatVND(submittedTotal)}
               </p>
               <button type="button" onClick={handleClose}
-                className="w-full py-3.5 bg-warm-chocolate hover:bg-warm-espresso text-cream-50 font-semibold rounded-xl">
+                className="print-button w-full py-3.5 bg-warm-chocolate hover:bg-warm-espresso text-cream-25 font-semibold rounded-lg">
                 {t.backToMenu}
               </button>
             </div>
@@ -394,7 +394,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                   <button
                     type="button"
                     onClick={handleTelegramOrder}
-                    className="w-full min-h-12 px-4 py-3 bg-[#229ED9] hover:bg-[#1e8bc0] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
+                    className="print-button w-full min-h-12 px-4 py-3 bg-warm-chocolate hover:bg-warm-espresso active:scale-[0.99] text-cream-25 font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
                   >
                     <Send className="w-4 h-4" />
                     <span>{t.orderViaTelegram}</span>
@@ -415,7 +415,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                       onFocus={(event) => event.currentTarget.select()}
                       className="w-full px-4 py-3 rounded-xl bg-cream-25 border border-warm-border text-sm text-warm-dark resize-y" />
                     <button type="button" onClick={handleOpenTelegram}
-                      className="w-full min-h-12 mt-2.5 px-4 py-3 bg-[#229ED9] hover:bg-[#1e8bc0] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm">
+                      className="print-button w-full min-h-12 mt-2.5 px-4 py-3 bg-warm-chocolate hover:bg-warm-espresso active:scale-[0.99] text-cream-25 font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors">
                       <Send className="w-4 h-4" />
                       <span>{t.openTelegram}</span>
                     </button>
@@ -428,7 +428,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                     type="button"
                     onClick={handleCopyZaloOrder}
                     disabled={isCopyingZalo}
-                    className="w-full min-h-12 px-4 py-3 bg-[#0068FF] hover:bg-[#0058db] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
+                    className="print-button w-full min-h-12 px-4 py-3 bg-caramel-700 hover:bg-caramel-600 active:scale-[0.99] text-cream-25 font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
                   >
                     <span>{t.copyZaloOrder}</span>
                   </button>
@@ -448,7 +448,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                   )}
                   <button type="button" onClick={handleOpenZalo}
                     disabled={!zaloCopyState || zaloCopyState.text !== getFullOrderText()}
-                    className="w-full min-h-12 mt-2.5 px-4 py-3 bg-[#0068FF] hover:bg-[#0058db] active:scale-[0.99] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                    className="print-button w-full min-h-12 mt-2.5 px-4 py-3 bg-caramel-700 hover:bg-caramel-600 active:scale-[0.99] text-cream-25 font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                     <MessageCircle className="w-4 h-4 shrink-0" />
                     <span>{t.openZalo}</span>
                   </button>
@@ -480,7 +480,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full min-h-11 px-4 bg-warm-chocolate hover:bg-warm-espresso text-cream-50 font-semibold rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 text-sm"
+                      className="print-button w-full min-h-11 px-4 bg-warm-chocolate hover:bg-warm-espresso text-cream-25 font-semibold rounded-lg flex items-center justify-center gap-2 disabled:opacity-60 text-sm"
                     >
                       <Send className="w-4 h-4" />
                       <span>{isSubmitting ? t.submitting : t.orderViaForm}</span>

@@ -45,7 +45,7 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center font-serif text-warm-muted/50 text-sm">
-            Афиget'
+            Afiget’
           </div>
         )}
       </div>
@@ -53,7 +53,7 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
       {/* Info & Controls */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <h4 className="font-serif text-sm sm:text-base font-bold text-warm-dark truncate">
+          <h4 className="font-serif text-sm sm:text-base font-semibold text-warm-chocolate line-clamp-2">
             {productName}
           </h4>
           <button

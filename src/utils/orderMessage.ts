@@ -27,7 +27,7 @@ export function formatOrderMessage({
   const isRu = language === 'ru';
   const lines: string[] = [];
 
-  lines.push(isRu ? "🥐 ЗАКАЗ — Афиget'" : "🥐 NEW ORDER — Афиget'");
+  lines.push(isRu ? "🥐 ЗАКАЗ — Afiget’" : "🥐 NEW ORDER — Afiget’");
   lines.push('');
 
   if (name && name.trim()) {

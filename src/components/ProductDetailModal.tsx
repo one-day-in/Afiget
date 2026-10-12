@@ -97,7 +97,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
       onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="product-detail-title"
         aria-describedby="product-detail-description"
-        className="flex w-full max-w-3xl max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-3rem)] flex-col overflow-hidden rounded-2xl bg-cream-25 text-warm-dark shadow-2xl">
+        className="flex w-full max-w-3xl max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-3rem)] flex-col overflow-hidden rounded-xl border border-warm-border bg-cream-25 text-warm-dark shadow-2xl">
         <div className="flex shrink-0 justify-end border-b border-warm-border/70 bg-cream-25 px-3 py-2">
           <button ref={closeButtonRef} type="button" onClick={onClose} aria-label={t.closeProductDetails}
             className="flex h-10 w-10 items-center justify-center rounded-full text-warm-dark hover:bg-cream-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-caramel-700">
@@ -112,7 +112,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
                 <img src={productImageUrl(product.image)} alt={productName}
                   className="h-full w-full object-contain" onError={() => setImageFailed(true)} />
               ) : (
-                <div className="flex h-full items-center justify-center font-serif text-3xl text-warm-muted/50">Афиget'</div>
+                <div className="flex h-full items-center justify-center font-serif text-3xl text-warm-muted/50">Afiget’</div>
               )}
             </div>
 
@@ -157,7 +157,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
                       <span className="text-lg font-bold">{formatVND(currentPrice)}</span>
                     </div>
                     <button type="button" onClick={handleAdd}
-                      className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-warm-chocolate px-4 py-3 text-sm font-semibold text-cream-25 hover:bg-warm-espresso focus-visible:outline focus-visible:outline-2 focus-visible:outline-caramel-700">
+                      className="print-button mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-warm-chocolate px-4 py-3 text-sm font-semibold text-cream-25 hover:bg-warm-espresso focus-visible:outline focus-visible:outline-2 focus-visible:outline-caramel-700">
                       {isAdded ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
                       {isAdded ? t.addedToCart : t.addToCart}
                     </button>

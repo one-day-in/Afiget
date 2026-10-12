@@ -5,8 +5,8 @@ interface BrandWordmarkProps {
 }
 
 export const BrandWordmark: React.FC<BrandWordmarkProps> = ({ className = '' }) => (
-  <span className={`brand-wordmark ${className}`} role="img" aria-label="Афиget'">
-    <span className="brand-wordmark__cyrillic" aria-hidden="true">Афи</span>
-    <span className="brand-wordmark__latin" aria-hidden="true">get'</span>
+  <span className={`brand-wordmark ${className}`} role="img" aria-label="Afiget’">
+    <span className="brand-wordmark__prefix" aria-hidden="true">Afi</span>
+    <span className="brand-wordmark__main" aria-hidden="true">get’</span>
   </span>
 );

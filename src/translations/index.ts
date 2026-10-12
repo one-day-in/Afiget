@@ -2,10 +2,10 @@ export type Language = 'ru' | 'en';
 
 export const translations = {
   ru: {
-    brand: "Афиget'",
+    brand: "Afiget’",
     brandCategory: 'по-домашнему',
     tagline: 'Домашняя кухня и кондитерская в Хошимине',
-    heroTitle: 'Наше меню',
+    heroTitle: 'Меню',
     heroSubtitle: 'Домашняя выпечка и любимые блюда в Хошимине. Готовим небольшими партиями — с заботой и вкусом.',
     menuEmpty: 'В этой категории пока нет блюд',
     all: 'Все блюда',
@@ -30,7 +30,7 @@ export const translations = {
     orderSummary: 'Стоимость продуктов',
     deliveryNotice: 'Доставка не включена. Мы свяжемся с вами, чтобы подтвердить заявку и детали доставки.',
     checkoutButton: 'Посмотреть и отправить заявку',
-    clearCart: 'Очистить',
+    clearCart: 'Очистить корзину',
     checkoutTitle: 'Заявка на заказ',
     checkoutSubtitle: 'Проверьте блюда и оставьте контакт — мы обсудим детали с вами.',
     yourOrder: 'Вы выбрали',
@@ -86,10 +86,10 @@ export const translations = {
     madeWithLove: 'Приготовлено с заботой и душой',
   },
   en: {
-    brand: "Афиget'",
+    brand: "Afiget’",
     brandCategory: 'Homemade',
     tagline: 'Home bakery & comfort food in Ho Chi Minh City',
-    heroTitle: 'Our Menu',
+    heroTitle: 'Menu',
     heroSubtitle: 'Homemade cakes and comfort food in Ho Chi Minh City, prepared in small batches with care.',
     menuEmpty: 'No dishes in this category yet',
     all: 'All dishes',
